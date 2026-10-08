@@ -1,10 +1,14 @@
 <template>
   <AppShell>
-    <main class="screen-enter flex min-h-[calc(100dvh-52px)] flex-col justify-between">
+    <main
+      class="screen-enter flex min-h-[calc(100dvh-52px)] flex-col justify-between"
+    >
       <div>
         <p class="kicker">NAIJA PARTY GAME</p>
         <h1 class="brand mt-3">WHO DEY MAD? 🇳🇬</h1>
-        <p class="subtitle">Prove you're the most Nigerian person in the group.</p>
+        <p class="subtitle">
+          Prove you're the most Nigerian person in the group.
+        </p>
         <div class="live-chip">
           <span class="pulse" />
           🔥 {{ playersToday.toLocaleString() }} players played today
@@ -22,7 +26,8 @@
       </div>
 
       <p class="tiny mt-8 text-center">
-        8 chaotic rounds. 10 seconds each. One Naija personality you can’t unsay.
+        8 chaotic rounds. 20 seconds each. One Naija personality you can’t
+        unsay.
       </p>
     </main>
   </AppShell>

@@ -237,7 +237,7 @@ a {
 }
 
 .timer-fill.drain {
-  animation: drain 10s linear forwards;
+  animation: drain 20s linear forwards;
 }
 
 .timer-fill.frozen {

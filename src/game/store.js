@@ -3,7 +3,7 @@ import { QUESTIONS, STAT_KEYS } from "../data/questions";
 import { pickPersonality } from "../data/personalities";
 
 export const ROUND_SIZE = 8;
-export const QUESTION_SECONDS = 10;
+export const QUESTION_SECONDS = 20;
 
 function emptyStats() {
   return STAT_KEYS.reduce((acc, key) => {
