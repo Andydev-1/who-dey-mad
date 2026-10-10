@@ -57,6 +57,32 @@ export const QUESTIONS = [
         stats: { patience: -10, wahala: -12, financial: 8, social: -6 },
       },
     ],
+    twist: {
+      prompt:
+        "The person entering is holding a Ghana-Must-Go and a live chicken. Conductor: “Oga, you go manage.”",
+      options: [
+        {
+          key: "A",
+          text: "Stand. Let the chicken have the seat.",
+          stats: { patience: 12, lagos: 10, wahala: -6 },
+        },
+        {
+          key: "B",
+          text: "“Manage what? This is a paid seat.”",
+          stats: { savage: 14, wahala: 12, social: 8 },
+        },
+        {
+          key: "C",
+          text: "Help them lift the bag, then reclaim your edge.",
+          stats: { negotiation: 12, streetIq: 10, social: 8 },
+        },
+        {
+          key: "D",
+          text: "Alight at the next bus stop. Soft life emergency.",
+          stats: { patience: -8, financial: 6, wahala: -10 },
+        },
+      ],
+    },
   },
   {
     id: "lagos-traffic",
@@ -94,6 +120,32 @@ export const QUESTIONS = [
         stats: { social: 16, savage: 8, patience: -6 },
       },
     ],
+    twist: {
+      prompt:
+        "Inner road. The driver stops: “Oga, fuel finish. You go add ₦2,000 make we continue.”",
+      options: [
+        {
+          key: "A",
+          text: "Pay. You just want to arrive.",
+          stats: { patience: 10, financial: -12, lagos: 8 },
+        },
+        {
+          key: "B",
+          text: "Negotiate ₦500 and a blessing.",
+          stats: { negotiation: 16, streetIq: 12, financial: 8 },
+        },
+        {
+          key: "C",
+          text: "Step down. Your legs still work.",
+          stats: { lagos: 12, savage: 8, patience: -8 },
+        },
+        {
+          key: "D",
+          text: "Call support and start a voice note for Twitter.",
+          stats: { social: 14, wahala: 10, savage: 8 },
+        },
+      ],
+    },
   },
   {
     id: "nepa",
@@ -131,6 +183,32 @@ export const QUESTIONS = [
         stats: { social: 12, patience: 10, savage: -8 },
       },
     ],
+    twist: {
+      prompt:
+        "Light goes again in 90 seconds. Rice is half-cooked. Zoom is ringing.",
+      options: [
+        {
+          key: "A",
+          text: "Join Zoom with camera off and a story about “network.”",
+          stats: { streetIq: 14, social: 8, savage: 6 },
+        },
+        {
+          key: "B",
+          text: "Start the gen. Interview can meet the noise.",
+          stats: { lagos: 12, financial: -8, wahala: 8 },
+        },
+        {
+          key: "C",
+          text: "Reschedule. Protect the rice and the job.",
+          stats: { patience: 12, financial: 8, negotiation: 8 },
+        },
+        {
+          key: "D",
+          text: "Finish the rice by flashlight. Career can wait 8 minutes.",
+          stats: { savage: 10, financial: -6, social: -6 },
+        },
+      ],
+    },
   },
   {
     id: "generator",
@@ -316,6 +394,32 @@ export const QUESTIONS = [
         stats: { wahala: -12, social: -10, patience: 8, financial: 10 },
       },
     ],
+    twist: {
+      prompt:
+        "The MC points at you: “This one in the green! Come and spray the couple!” The camera is already on your face.",
+      options: [
+        {
+          key: "A",
+          text: "Walk up slowly and spray ₦200 with cinema angles.",
+          stats: { streetIq: 14, financial: 10, social: 10 },
+        },
+        {
+          key: "B",
+          text: "Dance so hard they forget the money.",
+          stats: { social: 16, savage: 8, financial: 6 },
+        },
+        {
+          key: "C",
+          text: "Wave, smile, and mouth “I already did.”",
+          stats: { streetIq: 16, wahala: 6, patience: 6 },
+        },
+        {
+          key: "D",
+          text: "Empty your notes. Tomorrow is a problem for tomorrow.",
+          stats: { social: 18, financial: -16, savage: 8 },
+        },
+      ],
+    },
   },
   {
     id: "jollof",
@@ -575,6 +679,32 @@ export const QUESTIONS = [
         stats: { social: 12, savage: 12, financial: 8, wahala: 6 },
       },
     ],
+    twist: {
+      prompt:
+        "Your closest person texts: “Abeg, ₦15k till Friday. Urgent.” The alert is still warm.",
+      options: [
+        {
+          key: "A",
+          text: "Send ₦5k and a voice note of love.",
+          stats: { social: 12, financial: -8, patience: 8 },
+        },
+        {
+          key: "B",
+          text: "“Let me see what I can do” — then mute for 3 hours.",
+          stats: { streetIq: 14, financial: 10, wahala: 6 },
+        },
+        {
+          key: "C",
+          text: "Send it. Friendship is also a bill.",
+          stats: { social: 16, financial: -14, savage: -6 },
+        },
+        {
+          key: "D",
+          text: "Offer airtime and a plan, not cash.",
+          stats: { negotiation: 14, financial: 12, streetIq: 8 },
+        },
+      ],
+    },
   },
   {
     id: "month-end",
@@ -758,6 +888,154 @@ export const QUESTIONS = [
         reaction: "Director, not actor. Soft life camera crew.",
         points: 66,
         stats: { social: 8, patience: 10, wahala: -8 },
+      },
+    ],
+  },
+  {
+    id: "office",
+    tag: "Work",
+    emoji: "💼",
+    prompt:
+      "Your boss drops a “quick task” at 4:58pm. The email has 11 attachments and no deadline, which means tonight.",
+    options: [
+      {
+        key: "A",
+        text: "Reply “On it” and start suffering immediately.",
+        reaction: "Corporate corper. They will use you again tomorrow.",
+        points: 70,
+        stats: { patience: 14, social: 8, savage: -8, financial: 6 },
+      },
+      {
+        key: "B",
+        text: "Ask for the actual deadline like a professional adult.",
+        reaction: "Boundaries with grammar. HR would clap if they were brave.",
+        points: 90,
+        stats: { negotiation: 16, streetIq: 12, social: 10, patience: 8 },
+      },
+      {
+        key: "C",
+        text: "Leave it on read. Morning you is more qualified.",
+        reaction: "Last-minute legend loading. Risky, sometimes genius.",
+        points: 78,
+        stats: { savage: 10, wahala: 8, patience: -10, streetIq: 8 },
+      },
+      {
+        key: "D",
+        text: "Forward to the intern with “pls help handle.”",
+        reaction: "Leadership, they call it. The intern will remember.",
+        points: 74,
+        stats: { savage: 12, social: 6, wahala: 10, negotiation: 8 },
+      },
+    ],
+  },
+  {
+    id: "okada",
+    tag: "Lagos Transport",
+    emoji: "🏍️",
+    prompt:
+      "Okada man: “I no get extra helmet o, but I dey careful.” You’re already late.",
+    options: [
+      {
+        key: "A",
+        text: "Enter. Prayer is also PPE.",
+        reaction: "Faith-based transport policy. May your head remain original.",
+        points: 64,
+        stats: { lagos: 14, patience: -8, wahala: 10, streetIq: 6 },
+      },
+      {
+        key: "B",
+        text: "Wait for the next one that has two helmets.",
+        reaction: "Adulting in traffic. Rare, endangered, correct.",
+        points: 86,
+        stats: { patience: 14, financial: 6, lagos: 8, wahala: -8 },
+      },
+      {
+        key: "C",
+        text: "Negotiate the price down because of the missing helmet.",
+        reaction: "If we go die, make we die cheaper. Street math.",
+        points: 88,
+        stats: { negotiation: 18, streetIq: 14, savage: 8, lagos: 10 },
+      },
+      {
+        key: "D",
+        text: "Cancel the whole trip and “network is bad” the meeting.",
+        reaction: "Survival first. Calendar can take the L.",
+        points: 72,
+        stats: { streetIq: 10, social: -6, patience: 8, lagos: 8 },
+      },
+    ],
+  },
+  {
+    id: "suya",
+    tag: "Food",
+    emoji: "🔥",
+    prompt:
+      "Suya guy asks “Pepper?” You said small. He heard “redesign my soul.”",
+    options: [
+      {
+        key: "A",
+        text: "Eat it. Sweat is flavour.",
+        reaction: "Warrior. Tomorrow your stomach will file a report.",
+        points: 80,
+        stats: { savage: 12, patience: 10, lagos: 8, wahala: 6 },
+      },
+      {
+        key: "B",
+        text: "“Abeg, this one don pass small.” Ask for extra bread.",
+        reaction: "Customer service with evidence. Bread is the diplomat.",
+        points: 90,
+        stats: { negotiation: 14, streetIq: 12, social: 8, financial: 6 },
+      },
+      {
+        key: "C",
+        text: "Give it to the bravest person in the group.",
+        reaction: "Leadership by donation. Very uncle of you.",
+        points: 76,
+        stats: { social: 12, streetIq: 10, savage: 6, wahala: -6 },
+      },
+      {
+        key: "D",
+        text: "Post it. Caption: “He said small.”",
+        reaction: "The timeline will taste it for you.",
+        points: 70,
+        stats: { social: 16, savage: 8, wahala: 8 },
+      },
+    ],
+  },
+  {
+    id: "power-bank",
+    tag: "Power Outage",
+    emoji: "🔋",
+    prompt:
+      "House light has been off since morning. Your power bank is at 18% and three people are looking at it like family land.",
+    options: [
+      {
+        key: "A",
+        text: "Announce a charging rota like a local government.",
+        reaction: "Democracy. Nobody is happy, but it is fair.",
+        points: 88,
+        stats: { negotiation: 16, social: 12, patience: 10, streetIq: 8 },
+      },
+      {
+        key: "B",
+        text: "Hide it. “It has finished.”",
+        reaction: "National security. The lie will expire at 2am.",
+        points: 74,
+        stats: { streetIq: 14, savage: 10, social: -8, wahala: 8 },
+      },
+      {
+        key: "C",
+        text: "Charge everybody a little. Suffer equally.",
+        reaction: "Ubuntu until 4%. Then jungle law.",
+        points: 82,
+        stats: { patience: 12, social: 10, lagos: 8, financial: -4 },
+      },
+      {
+        key: "D",
+        text: "Go outside and hunt for a shop with light like a prophet.",
+        reaction: "Field research. Lagos will provide, maybe.",
+        points: 78,
+        stats: { lagos: 14, streetIq: 10, wahala: 6, patience: 6 },
       },
     ],
   },

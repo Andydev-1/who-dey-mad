@@ -1,8 +1,14 @@
 import { computed, reactive } from "vue";
 import { QUESTIONS, STAT_KEYS } from "../data/questions";
 import { pickPersonality } from "../data/personalities";
+import { pickReaction } from "../data/reactions";
+import { rankForXp } from "../data/ranks";
+import { ROUND_SIZE } from "../data/rounds";
+import { buildDeck, popularKey, secondsForBeat } from "./deck";
+import { hashCode } from "./rng";
+import { scoreAnswer } from "./scoring";
 
-export const ROUND_SIZE = 8;
+export { ROUND_SIZE };
 export const QUESTION_SECONDS = 20;
 
 function emptyStats() {
@@ -14,34 +20,6 @@ function emptyStats() {
 
 function clamp(n, min = 0, max = 100) {
   return Math.max(min, Math.min(max, n));
-}
-
-function hashCode(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i += 1) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
-}
-
-function mulberry32(seed) {
-  return function rng() {
-    let t = (seed += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function shuffle(list, seed) {
-  const copy = [...list];
-  const rng = mulberry32(seed);
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(rng() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
 }
 
 export function generateChallengeCode() {
@@ -81,18 +59,36 @@ export const game = reactive({
   score: 0,
   answers: [],
   phase: "idle",
+  beat: "intro",
   lastReaction: null,
   lastPoints: 0,
+  lastBreakdown: null,
   timedOut: false,
   personality: null,
+  rank: null,
   highScore: false,
   shared: false,
+  locked: false,
+  streak: 0,
+  bestStreak: 0,
+  selectedKey: null,
+  personalKey: null,
+  predictedKey: null,
+  predictionHit: false,
+  continueTarget: "next",
+  reactionHistory: [],
+  roundXpLog: [],
 });
 
 export const currentQuestion = computed(() => game.deck[game.index] ?? null);
+
+export const currentSeconds = computed(() =>
+  secondsForBeat(currentQuestion.value, game.beat),
+);
+
 export const progress = computed(() => ({
   current: Math.min(game.index + 1, game.deck.length),
-  total: game.deck.length,
+  total: game.deck.length || ROUND_SIZE,
 }));
 
 export const displayStats = computed(() => {
@@ -103,9 +99,41 @@ export const displayStats = computed(() => {
   return out;
 });
 
-export function startGame({ mode = "solo", challengeCode = null, playerName = "You" } = {}) {
-  const seed = challengeCode ? hashCode(challengeCode) : Math.floor(Math.random() * 1e9);
-  const deck = shuffle(QUESTIONS, seed).slice(0, ROUND_SIZE);
+export const isLastRound = computed(
+  () => game.index + 1 >= game.deck.length && game.deck.length > 0,
+);
+
+function applyStats(option) {
+  if (!option?.stats) return;
+  const nextStats = { ...game.stats };
+  for (const [key, delta] of Object.entries(option.stats)) {
+    nextStats[key] = clamp((nextStats[key] ?? 40) + delta);
+  }
+  game.stats = nextStats;
+}
+
+function rememberReaction(line) {
+  game.lastReaction = line;
+  game.reactionHistory = [...game.reactionHistory, line].slice(-8);
+}
+
+function freezeOption(question) {
+  return {
+    key: "X",
+    text: "Froze",
+    stats: { patience: -8, lagos: 4, wahala: 6 },
+  };
+}
+
+export function startGame({
+  mode = "solo",
+  challengeCode = null,
+  playerName = "You",
+} = {}) {
+  const seed = challengeCode
+    ? hashCode(challengeCode)
+    : Math.floor(Math.random() * 1e9);
+  const deck = buildDeck(seed);
 
   game.mode = mode;
   game.challengeCode = challengeCode;
@@ -116,71 +144,213 @@ export function startGame({ mode = "solo", challengeCode = null, playerName = "Y
   game.score = 0;
   game.answers = [];
   game.phase = "playing";
+  game.beat = "intro";
   game.lastReaction = null;
   game.lastPoints = 0;
+  game.lastBreakdown = null;
   game.timedOut = false;
   game.personality = null;
+  game.rank = null;
   game.highScore = false;
   game.shared = false;
+  game.locked = false;
+  game.streak = 0;
+  game.bestStreak = 0;
+  game.selectedKey = null;
+  game.personalKey = null;
+  game.predictedKey = null;
+  game.predictionHit = false;
+  game.continueTarget = "next";
+  game.reactionHistory = [];
+  game.roundXpLog = [];
 }
 
-export function applyAnswer(option, { timedOut = false } = {}) {
+export function beginQuestion() {
   if (game.phase !== "playing") return;
+  if (game.beat !== "intro") return;
+  game.beat = "question";
+  game.locked = false;
+  game.timedOut = false;
+  game.selectedKey = null;
+  game.personalKey = null;
+  game.predictedKey = null;
+  game.predictionHit = false;
+  game.continueTarget = "next";
+  game.lastReaction = null;
+}
+
+export function applyAnswer(option, { timedOut = false, remaining = 0 } = {}) {
+  if (game.locked) return;
+  if (!["question", "twist", "predict"].includes(game.beat)) return;
 
   const question = currentQuestion.value;
   if (!question) return;
 
-  const chosen = timedOut
-    ? {
-        key: "X",
-        text: "Froze",
-        reaction: "Timer finished you. Even NEPA gives more notice.",
-        points: 12,
-        stats: { patience: -8, lagos: 4, wahala: 6 },
-      }
-    : option;
-
-  const nextStats = { ...game.stats };
-  for (const [key, delta] of Object.entries(chosen.stats || {})) {
-    nextStats[key] = clamp((nextStats[key] ?? 40) + delta);
+  game.locked = true;
+  game.timedOut = timedOut;
+  const duration = secondsForBeat(question, game.beat);
+  const chosen = timedOut ? freezeOption(question) : option;
+  if (!chosen) {
+    game.locked = false;
+    return;
   }
 
-  game.stats = nextStats;
-  game.score += chosen.points;
-  game.answers.push({
-    questionId: question.id,
-    key: chosen.key,
-    points: chosen.points,
+  game.selectedKey = chosen.key;
+
+  if (game.beat === "question" && question.playType === "unpopular" && !timedOut) {
+    applyStats(chosen);
+    game.personalKey = chosen.key;
+    game.answers.push({
+      questionId: question.id,
+      key: chosen.key,
+      playType: question.playType,
+      beat: "question",
+    });
+    game.locked = false;
+    game.beat = "predict";
+    return;
+  }
+
+  if (
+    game.beat === "question" &&
+    question.playType === "plotTwist" &&
+    question.twist &&
+    !timedOut
+  ) {
+    applyStats(chosen);
+    game.personalKey = chosen.key;
+    game.answers.push({
+      questionId: question.id,
+      key: chosen.key,
+      playType: question.playType,
+      beat: "question",
+    });
+    const scored = scoreAnswer({
+      timedOut: false,
+      remaining,
+      duration,
+      streak: game.streak,
+      playType: question.playType,
+      beat: "question",
+    });
+    game.streak = scored.nextStreak;
+    game.bestStreak = Math.max(game.bestStreak, game.streak);
+    game.score += scored.xp;
+    game.lastPoints = scored.xp;
+    game.lastBreakdown = scored.breakdown;
+    game.roundXpLog.push(scored.xp);
+    rememberReaction(
+      pickReaction(
+        {
+          timedOut: false,
+          streak: game.streak,
+          quick: scored.quick,
+          playType: question.playType,
+          beat: "question",
+          option: chosen,
+        },
+        game.reactionHistory,
+      ),
+    );
+    game.continueTarget = "twist";
+    game.beat = "reaction";
+    game.phase = "reaction";
+    return;
+  }
+
+  if (game.beat === "predict") {
+    const popular = popularKey(question);
+    game.predictedKey = timedOut ? null : chosen.key;
+    game.predictionHit = !timedOut && chosen.key === popular;
+  } else {
+    applyStats(chosen);
+    game.answers.push({
+      questionId: question.id,
+      key: chosen.key,
+      playType: question.playType,
+      beat: game.beat,
+      timedOut,
+    });
+  }
+
+  const scored = scoreAnswer({
     timedOut,
+    remaining,
+    duration,
+    streak: game.streak,
+    playType: question.playType,
+    predictionHit: game.predictionHit,
+    beat: game.beat,
   });
-  game.lastReaction = chosen.reaction;
-  game.lastPoints = chosen.points;
-  game.timedOut = timedOut;
+
+  game.streak = scored.nextStreak;
+  game.bestStreak = Math.max(game.bestStreak, game.streak);
+  game.score += scored.xp;
+  game.lastPoints = scored.xp;
+  game.lastBreakdown = scored.breakdown;
+  game.roundXpLog.push(scored.xp);
+  rememberReaction(
+    pickReaction(
+      {
+        timedOut,
+        streak: game.streak,
+        quick: scored.quick,
+        playType: question.playType,
+        beat: game.beat,
+        option: chosen,
+        predictionHit: game.predictionHit,
+      },
+      game.reactionHistory,
+    ),
+  );
+  game.continueTarget = "next";
+  game.beat = "reaction";
   game.phase = "reaction";
 }
 
 export function continueAfterReaction() {
+  if (game.continueTarget === "twist") {
+    game.phase = "playing";
+    game.beat = "twist";
+    game.locked = false;
+    game.selectedKey = null;
+    game.timedOut = false;
+    game.lastReaction = null;
+    return;
+  }
+
   if (game.index + 1 >= game.deck.length) {
     finishGame();
     return;
   }
+
   game.index += 1;
   game.phase = "playing";
+  game.beat = "intro";
+  game.locked = false;
   game.lastReaction = null;
   game.timedOut = false;
+  game.selectedKey = null;
+  game.personalKey = null;
+  game.predictedKey = null;
+  game.predictionHit = false;
 }
 
 export function finishGame() {
   game.personality = pickPersonality(game.stats);
-  const maxScore = game.deck.length * 96;
-  game.highScore = game.score >= maxScore * 0.72;
+  game.rank = rankForXp(game.score);
+  game.highScore = game.rank.id === "chairman" || game.bestStreak >= 4;
   game.phase = "result";
+  game.beat = "result";
 
   if (game.challengeCode) {
     persistChallenge(game.challengeCode, {
       name: game.playerName,
       score: game.score,
       personality: game.personality.name,
+      personalityId: game.personality.id,
+      rank: game.rank.name,
+      answers: game.answers.filter((row) => row.beat === "question" || !row.beat),
       at: Date.now(),
     });
   }
@@ -188,4 +358,8 @@ export function finishGame() {
 
 export function markShared() {
   game.shared = true;
+}
+
+export function questionById(id) {
+  return QUESTIONS.find((question) => question.id === id) ?? null;
 }

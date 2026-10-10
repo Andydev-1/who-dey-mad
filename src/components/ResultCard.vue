@@ -4,6 +4,9 @@
     <p class="eyebrow">YOUR NAIJA PERSONALITY</p>
     <h2>{{ personality.emoji }} {{ personality.name }}</h2>
     <p class="tagline">{{ personality.tagline }}</p>
+    <p v-if="rank" class="tiny mt-2">
+      {{ xp }} XP · {{ rank.emoji }} {{ rank.name }}
+    </p>
     <p class="desc">{{ personality.description }}</p>
     <div class="result-stats">
       <StatBar
@@ -24,6 +27,8 @@ import StatBar from "./StatBar.vue";
 defineProps({
   personality: { type: Object, required: true },
   stats: { type: Object, required: true },
+  xp: { type: Number, default: 0 },
+  rank: { type: Object, default: null },
 });
 
 const highlightKeys = ["streetIq", "wahala", "financial", "lagos"];

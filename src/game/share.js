@@ -1,6 +1,6 @@
 import { STAT_LABELS } from "../data/questions";
 
-export function shareText({ personality, stats, score, challengeCode }) {
+export function shareText({ personality, stats, score, rank, challengeCode }) {
   const top = Object.entries(stats)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4)
@@ -10,12 +10,14 @@ export function shareText({ personality, stats, score, challengeCode }) {
   const challengeLine = challengeCode
     ? `\nChallenge code: ${challengeCode}`
     : "";
+  const rankLine = rank ? `\nRank: ${rank.emoji} ${rank.name}` : "";
 
   return `WHO DEY MAD? 🇳🇬
 
 I just got:
 ${personality.name} ${personality.emoji}
-Score: ${score}
+${personality.tagline}
+XP: ${score}${rankLine}
 
 ${top}
 
@@ -24,8 +26,15 @@ ${personality.description}
 What's YOUR Naija personality?${challengeLine}`;
 }
 
-export async function shareResult({ personality, stats, score, challengeCode, file }) {
-  const text = shareText({ personality, stats, score, challengeCode });
+export async function shareResult({
+  personality,
+  stats,
+  score,
+  rank,
+  challengeCode,
+  file,
+}) {
+  const text = shareText({ personality, stats, score, rank, challengeCode });
   const url = challengeCode
     ? `${window.location.origin}/friends?code=${challengeCode}`
     : window.location.origin;
@@ -49,7 +58,7 @@ export async function shareResult({ personality, stats, score, challengeCode, fi
   return "copied";
 }
 
-export function renderResultCard({ personality, stats, score }) {
+export function renderResultCard({ personality, stats, score, rank }) {
   const width = 1080;
   const height = 1350;
   const canvas = document.createElement("canvas");
@@ -114,7 +123,8 @@ export function renderResultCard({ personality, stats, score }) {
 
   ctx.fillStyle = "rgba(248,250,252,0.9)";
   ctx.font = "700 32px Outfit, system-ui, sans-serif";
-  ctx.fillText(`Score ${score}  ·  What's YOUR Naija personality?`, 80, 1288);
+  const rankLabel = rank ? `  ·  ${rank.name}` : "";
+  ctx.fillText(`${score} XP${rankLabel}  ·  What's YOUR Naija personality?`, 80, 1288);
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {

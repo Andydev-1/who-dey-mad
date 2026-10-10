@@ -76,13 +76,52 @@ a {
   left: -80px;
 }
 
+.ambient {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.dust {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(61, 220, 132, 0.18);
+  left: calc(8% * var(--i));
+  bottom: -10px;
+  animation: float-up 11s linear infinite;
+  animation-delay: calc(var(--i) * -1.3s);
+}
+
+@keyframes float-up {
+  to {
+    transform: translateY(-110dvh);
+    opacity: 0;
+  }
+}
+
 .app-frame {
   position: relative;
   z-index: 1;
-  width: min(430px, 100%);
+  width: min(480px, 100%);
   margin: 0 auto;
   min-height: 100dvh;
   padding: 20px 18px 32px;
+}
+
+@media (min-width: 768px) {
+  .app-frame {
+    width: min(560px, 100%);
+    padding: 32px 24px 48px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-frame {
+    width: min(680px, 100%);
+  }
 }
 
 .screen-enter {
@@ -186,15 +225,6 @@ a {
   animation: pulse 1.6s infinite;
 }
 
-@keyframes drain {
-  from {
-    width: 100%;
-  }
-  to {
-    width: 0%;
-  }
-}
-
 @keyframes pulse {
   70% {
     box-shadow: 0 0 0 8px rgba(0, 200, 83, 0);
@@ -234,15 +264,12 @@ a {
   border-radius: inherit;
   background: linear-gradient(90deg, var(--green), #fbbf24);
   transform-origin: left;
-}
-
-.timer-fill.drain {
-  animation: drain 20s linear forwards;
+  transition: width 1s linear, background 0.2s ease;
 }
 
 .timer-fill.frozen {
   width: 0%;
-  animation: none;
+  transition: none;
 }
 
 .timer-fill.urgent {
@@ -268,9 +295,28 @@ a {
   transform: scale(0.99);
 }
 
-.option:hover {
+.option:hover:not(:disabled) {
   border-color: rgba(61, 220, 132, 0.55);
   background: rgba(0, 200, 83, 0.08);
+}
+
+.option.picked {
+  border-color: rgba(61, 220, 132, 0.9);
+  background: rgba(0, 200, 83, 0.16);
+  transform: scale(1.01);
+}
+
+.option.dimmed {
+  opacity: 0.45;
+}
+
+.option.hit {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
+}
+
+.option:disabled {
+  cursor: default;
 }
 
 .option-key {
@@ -463,4 +509,128 @@ a {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+}
+
+.home-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mascot {
+  flex: 0 0 auto;
+  width: 92px;
+  height: 92px;
+}
+
+.mascot-svg {
+  width: 100%;
+  height: 100%;
+  animation: bob 2.8s ease-in-out infinite;
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.rotating-line {
+  min-height: 1.5em;
+  margin: 18px 0 0;
+  color: var(--green-2);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.daily-preview {
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.daily-preview:hover {
+  border-color: rgba(61, 220, 132, 0.45);
+}
+
+.round-pill {
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(0, 200, 83, 0.14);
+  color: var(--green-2);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.question-card.hotseat {
+  border-color: rgba(251, 113, 133, 0.45);
+}
+
+.question-card.bonus,
+.question-card.finale {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.question-card.plotTwist {
+  border-color: rgba(196, 181, 253, 0.4);
+}
+
+.question-enter {
+  animation: rise 0.35s ease both;
+}
+
+.round-intro {
+  padding: 42px 18px;
+}
+
+.streak-chip {
+  display: inline-flex;
+  margin: 10px 0 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.16);
+  color: #fbbf24;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.compare-row {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.result-reveal {
+  animation: rise 0.5s ease both;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-enter,
+  .question-enter,
+  .result-reveal,
+  .pulse,
+  .dust,
+  .mascot-svg,
+  .points-pop,
+  .confetti-piece {
+    animation: none !important;
+  }
+
+  .timer-fill,
+  .stat-fill,
+  .btn,
+  .option {
+    transition: none !important;
+  }
 }

@@ -5,7 +5,8 @@
       <p class="kicker">SQUAD MODE</p>
       <h1 class="brand mt-2 text-[2.1rem]">Play with friends</h1>
       <p class="subtitle">
-        Same questions. Same chaos. Highest Naija personality energy wins.
+        Same questions. Same chaos. Compare answers on this device, or share a
+        code so a friend can play the same deck later.
       </p>
 
       <section class="card mt-6 stack">
@@ -30,16 +31,16 @@
           </button>
         </div>
         <p class="tiny">
-          Share this code or the link. Scores stay on this device for the
-          prototype.
+          Scores and answers stay in this browser for the prototype. Nothing is
+          sent to a server.
         </p>
       </section>
 
       <p v-if="notice" class="toast mt-4">{{ notice }}</p>
 
       <div class="stack mt-5">
-        <button class="btn btn-secondary" @click="copyLink">
-          COPY CHALLENGE LINK
+        <button class="btn btn-secondary" @click="shareOrCopy">
+          SHARE CHALLENGE LINK
         </button>
         <button
           class="btn btn-primary"
@@ -51,14 +52,14 @@
       </div>
 
       <section v-if="board.length" class="card mt-6">
-        <p class="kicker">LIVE BOARD</p>
+        <p class="kicker">BOARD ON THIS DEVICE</p>
         <div
           v-for="row in board"
           :key="row.at"
-          class="mt-3 flex justify-between text-sm"
+          class="mt-3 flex justify-between gap-3 text-sm"
         >
           <span>{{ row.name }}</span>
-          <strong>{{ row.score }}</strong>
+          <strong>{{ row.score }} XP · {{ row.personality }}</strong>
         </div>
       </section>
     </main>
@@ -95,12 +96,34 @@ onMounted(() => {
 
 function mint() {
   code.value = generateChallengeCode();
+  notice.value = "";
 }
 
-async function copyLink() {
-  const url = `${window.location.origin}/friends?code=${code.value}`;
-  await navigator.clipboard.writeText(url);
-  notice.value = "Link copied. Drop it in the group.";
+function challengeUrl() {
+  return `${window.location.origin}/friends?code=${code.value.toUpperCase()}`;
+}
+
+async function shareOrCopy() {
+  const url = challengeUrl();
+  const text = `WHO DEY MAD? 🇳🇬\nSame questions. Beat my Naija energy.\nCode: ${code.value.toUpperCase()}`;
+  notice.value = "";
+
+  if (typeof navigator.share === "function") {
+    try {
+      await navigator.share({ title: "WHO DEY MAD?", text, url });
+      notice.value = "Share sheet opened. Send it yourself from there.";
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(`${text}\n${url}`);
+    notice.value = "Link copied. Drop it in the group yourself.";
+  } catch {
+    notice.value = "Couldn’t copy. Long-press the code and share it manually.";
+  }
 }
 
 function start() {
